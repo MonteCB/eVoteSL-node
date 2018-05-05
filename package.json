@@ -4,7 +4,22 @@
   "description": "user authentication application",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app",
+    "serve": "nodemon server.js"
+  },
+  "dependencies": {
+    "@angular/cli": "^1.7.1",
+    "bcryptjs": "*",
+    "body-parser": "*",
+    "cors": "*",
+    "express": "*",
+    "jsonwebtoken": "*",
+    "mongoose": "*",
+    "mongoose-unique-validator": "^2.0.0",
+    "nodemon": "^1.15.1",
+    "passport": "*",
+    "passport-jwt": "*"
   },
   "author": "Monte",
   "license": "ISC"
