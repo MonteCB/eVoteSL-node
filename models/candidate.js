@@ -46,3 +46,7 @@ module.exports.getCandidateByNum = function (candidate_no, callback) {
     Candidate.findOne(query, callback);
 
 }
+
+module.exports.getCandidateById = function (id, callback) {
+    Candidate.findById(id, callback);
+}

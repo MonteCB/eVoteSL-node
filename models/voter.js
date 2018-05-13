@@ -33,3 +33,8 @@ module.exports.getVoterByNic = function (nic, callback) {
     Voter.findOne(query, callback);
 
 }
+
+
+module.exports.getVoterById = function (id, callback) {
+    Voter.findById(id, callback);
+}

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const config = require('../config/database');
 
-//user schema
+//election schema
 const ElectionSchema = mongoose.Schema({
     name: {
         type: String
@@ -11,19 +11,31 @@ const ElectionSchema = mongoose.Schema({
         type: Boolean,
         required: true
     },
-    username: {
+    stopped: {
+        type: Boolean,
+        required: true
+    },
+    paused: {
+        type: Boolean,
+        required: true
+    },
+    e_id: {
         type: String,
         required: true
     },
-    password: {
-        type: String,
+    new_election:{
+        type:Boolean,
         required: true
     },
-    usertype: {
-        type: String,
+    can_release:{
+        type:Boolean,
         required: true
     }
+    
 });
 
 const Election = module.exports = mongoose.model('Election', ElectionSchema);
 
+module.exports.addel = function (newUser, callback) {
+    newUser.save(callback);
+}
