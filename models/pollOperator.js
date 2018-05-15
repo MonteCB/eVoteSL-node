@@ -22,6 +22,10 @@ const PollOperatorSchema = mongoose.Schema({
     poll_station: {
         type: String,
         required: true
+    },
+    assigned: {
+        type: Boolean,
+        required: true
     }
 
     

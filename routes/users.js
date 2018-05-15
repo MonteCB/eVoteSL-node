@@ -80,7 +80,8 @@ router.post('/register_po', (req, res, next) => {
         username: req.body.username,
         password: req.body.password,
         poll_station: req.body.poll_station,
-        usertype: "poll Operator"
+        usertype: "poll Operator",
+        assigned: false
     });
 
     PollOperator.getUserByUsername(checkUsername, (err, user) => {
@@ -581,6 +582,16 @@ router.get('/party', function (req, res, next) {
     })
 });
 
+router.get('/poll_station', function (req, res, next) {
+    PollOperator.find(function (err, poll_stations) {
+        if (err) {
+            res.send(err);
+        }
+        res.json(poll_stations);
+
+    })
+});
+
 
 router.get('/access', function (req, res, next) {
     const id = "e01";
@@ -676,6 +687,16 @@ router.post('/mark_booth_activate', function (req, res, next) {
 router.post('/mark_voter', function (req, res, next) {
     const id = req.body.id;
     Voter.update({ nic: id }, { $set: { isVoted: true } }, function (err, booth) {
+        // As always, handle any potential errors:
+        if (err) return next(err);
+
+        res.json({ success: true });
+    });
+})
+
+router.post('/mark_poll', function (req, res, next) {
+    const poll = req.body.poll_station;
+    PollOperator.update({ poll_station: poll }, { $set: { assigned: true } }, function (err, poll) {
         // As always, handle any potential errors:
         if (err) return next(err);
 
