@@ -9,6 +9,7 @@ const Candidate = require('../models/candidate');
 const Booth = require('../models/booth');
 const PollOperator = require('../models/pollOperator');
 const Election = require('../models/election');
+const Party = require('../models/e_party');
 const bcrypt = require('bcryptjs');
 
 //register
@@ -73,6 +74,7 @@ router.post('/registerel', (req, res, next) => {
 //register poll Operator
 router.post('/register_po', (req, res, next) => {
     const checkUsername = req.body.username;
+    const checkPollStation = req.body.poll_station;
     let newUser = new PollOperator({
         name: req.body.name,
         username: req.body.username,
@@ -86,13 +88,21 @@ router.post('/register_po', (req, res, next) => {
         if (user) {
             res.json({ success: false, msg: 'Username already exists' });
         } else {
-            PollOperator.addPo(newUser, (err, user) => {
-                if (err) {
-                    console.log(err);
-                    res.json({ success: false, msg: 'failed to register' });
+            PollOperator.getUserByStation(checkPollStation, (err, user) => {
+                if (err) throw err;
+                if (user) {
+                    res.json({ success: false, msg: 'Poll station already exists' });
                 } else {
-                    res.json({ success: true, msg: ' registered' });
+                    PollOperator.addPo(newUser, (err, user) => {
+                        if (err) {
+                            console.log(err);
+                            res.json({ success: false, msg: 'failed to register' });
+                        } else {
+                            res.json({ success: true, msg: ' registered' });
+                        }
+                    });
                 }
+        
             });
         }
 
@@ -151,6 +161,44 @@ router.post('/register_voter', (req, res, next) => {
                 } else {
                     res.json({ success: true, msg: ' registered' });
                 }
+            });
+        }
+
+    });
+
+
+});
+
+router.post('/register_party', (req, res, next) => {
+    const checkparty = req.body.name;
+    const checkpartyid = req.body.party_id;
+    let newUser = new Party({
+        name: req.body.name,
+        party_id: req.body.party_id,
+        votes: 0
+    });
+
+    //adding the user to the database, invoking the encrypting functionality
+
+    Party.getPartyByName(checkparty, (err, user) => {
+        if (err) throw err;
+        if (user) {
+            res.json({ success: false, msg: 'The party you are trying to register is already registered.' });
+        } else {
+            Party.getPartyByPartyId(checkpartyid, (err, user) => {
+                if (err) throw err;
+                if (user) {
+                    res.json({ success: false, msg: 'Party Id is already assigned to another party.' });
+                } else {
+                    Party.addParty(newUser, (err, user) => {
+                        if (err) {
+                            res.json({ success: false, msg: 'failed to register' });
+                        } else {
+                            res.json({ success: true, msg: ' registered' });
+                        }
+                    });
+                }
+        
             });
         }
 
@@ -519,6 +567,16 @@ router.get('/candidate', function (req, res, next) {
             res.send(err);
         }
         res.json(candidates);
+
+    })
+});
+
+router.get('/party', function (req, res, next) {
+    Party.find(function (err, parties) {
+        if (err) {
+            res.send(err);
+        }
+        res.json(parties);
 
     })
 });

@@ -40,6 +40,12 @@ module.exports.getUserByUsername = function (username, callback) {
 
 }
 
+module.exports.getUserByStation= function (poll_station, callback) {
+    const query = {poll_station: poll_station}
+    PollOperator.findOne(query, callback);
+
+}
+
 //hashing the password with salt and bcrypt
 module.exports.addPo = function (newUser, callback) {
     bcrypt.genSalt(10, (err, salt) => {

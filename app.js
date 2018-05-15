@@ -26,6 +26,7 @@ const app = express(); // initializing express
 
 const users = require('./routes/users');
 
+
 const port = 3000;
 
 //cors middleware
@@ -45,6 +46,7 @@ require('./config/passport')(passport);
 
 
 app.use('/users', users);
+
 
 //Index route
 app.get('/', (req, res) => {
