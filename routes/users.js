@@ -615,11 +615,17 @@ router.delete('/voter/:id', function (req, res, next) {
 
 router.post('/vote', function (req, res, next) {
     const id = req.body.id;
+    const party = req.body.party;
     Candidate.update({ candidate_no: id }, { $inc: { votes: 1 } }, function (err, candidate) {
         // As always, handle any potential errors:
         if (err) return next(err);
 
-        res.json({ success: true });
+        Party.update({ name: party }, { $inc: { votes: 1 } }, function (err, party) {
+            // As always, handle any potential errors:
+            if (err) return next(err);
+    
+            res.json({ success: true });
+        });
     });
 })
 
@@ -693,6 +699,26 @@ router.post('/mark_voter', function (req, res, next) {
         res.json({ success: true });
     });
 })
+
+router.post('/reset', function (req, res, next) {
+    Voter.updateMany({}, { $set: { isVoted: false } }, function (err, voter) {
+        // As always, handle any potential errors:
+        if (err) return next(err);
+        Candidate.updateMany({}, { $set: { votes: 0 } }, function (err, candidate) {
+            // As always, handle any potential errors:
+            if (err) return next(err);
+    
+            Party.updateMany({}, { $set: { votes: 0 } }, function (err, party) {
+                // As always, handle any potential errors:
+                if (err) return next(err);
+        
+                res.json({ success: true });
+            });
+        });
+        
+    });
+})
+
 
 router.post('/mark_poll', function (req, res, next) {
     const poll = req.body.poll_station;
