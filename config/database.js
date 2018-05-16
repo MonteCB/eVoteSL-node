@@ -1,4 +1,4 @@
 module.exports = {
-    database: 'mongodb://localhost:27017/evotesl',
+    database: 'mongodb://evotesl:evotesl@ds111390.mlab.com:11390/evotesl',
     secret: 'yoursecret'
 }
