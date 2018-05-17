@@ -30,6 +30,14 @@ const ElectionSchema = mongoose.Schema({
     can_release:{
         type:Boolean,
         required: true
+    },
+    rejected:{
+        type:Number,
+        required: true
+    },
+    total_votes:{
+        type:Number,
+        required: true
     }
     
 });

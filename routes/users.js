@@ -12,6 +12,8 @@ const Election = require('../models/election');
 const Party = require('../models/e_party');
 const bcrypt = require('bcryptjs');
 
+
+                                                        //Election Commissioner Routes
 //register
 router.post('/register', (req, res, next) => {
     const checkUsername = req.body.username;
@@ -40,6 +42,57 @@ router.post('/register', (req, res, next) => {
 
     });
     //adding the user to the database, invoking the encrypting functionality
+
+});
+
+
+
+router.post('/update_user', (req, res, next) => {
+    const checkUser = req.body.username;
+    const checkUserId = req.body.id;
+    const name = req.body.name;
+    const username = req.body.username;
+    const email = req.body.email;
+    const id = req.body.id;
+
+
+
+
+    ElectionCommissioner.getUserById(checkUserId, (err, user) => {
+        if (err) throw err;
+        if (user) {
+
+            if (user.username == checkUser) {
+
+
+                ElectionCommissioner.update({ _id: checkUserId }, { $set: { name: name, email: email } }, function (err, user) {
+
+                    if (err) return next(err);
+
+                    res.json({ success: true });
+                });
+
+
+            } else {
+                ElectionCommissioner.getUserByUsername(checkUser, (err, user) => {
+                    if (err) throw err;
+                    if (user) {
+                        res.json({ success: false, msg: 'The username you have entered is already assigned. Submit another username' });
+                    } else {
+
+                        ElectionCommissioner.update({ _id: checkUserId }, { $set: { name: name, email: email, username: username } }, function (err, user) {
+
+                            if (err) return next(err);
+
+                            res.json({ success: true });
+                        });
+
+                    }
+                });
+            }
+        }
+    });
+
 
 });
 
@@ -103,7 +156,7 @@ router.post('/register_po', (req, res, next) => {
                         }
                     });
                 }
-        
+
             });
         }
 
@@ -199,7 +252,7 @@ router.post('/register_party', (req, res, next) => {
                         }
                     });
                 }
-        
+
             });
         }
 
@@ -255,7 +308,7 @@ router.post('/update_candidate', (req, res, next) => {
     const party = req.body.party;
     const candidate_no = req.body.candidate_no;
     const id = req.body.id;
-    
+
     Candidate.getCandidateById(checkCandidateId, (err, user) => {
         if (err) throw err;
         if (user) {
@@ -332,7 +385,7 @@ router.post('/update_voter', (req, res, next) => {
             if (user.nic == checkVoter) {
                 Voter.update({ _id: checkVoterId }, { $set: { name: name, district: district } }, function (err, voter) {
                     if (err) return next(err);
-                   res.json({ success: true });
+                    res.json({ success: true });
                 });
             } else {
                 Voter.getVoterByNic(checkVoter, (err, user) => {
@@ -352,54 +405,6 @@ router.post('/update_voter', (req, res, next) => {
 });
 
 
-router.post('/update_user', (req, res, next) => {
-    const checkUser = req.body.username;
-    const checkUserId = req.body.id;
-    const name = req.body.name;
-    const username = req.body.username;
-    const email = req.body.email;
-    const id = req.body.id;
-
-
-
-    
-    ElectionCommissioner.getUserById(checkUserId, (err, user) => {
-        if (err) throw err;
-        if (user) {
-
-            if (user.username == checkUser) {
-
-
-                ElectionCommissioner.update({ _id: checkUserId }, { $set: { name: name, email: email } }, function (err, user) {
-
-                    if (err) return next(err);
-
-                    res.json({ success: true });
-                });
-
-
-            } else {
-                ElectionCommissioner.getUserByUsername(checkUser, (err, user) => {
-                    if (err) throw err;
-                    if (user) {
-                        res.json({ success: false, msg: 'The username you have entered is already assigned. Submit another username' });
-                    } else {
-
-                        ElectionCommissioner.update({ _id: checkUserId }, { $set: { name: name, email: email, username: username } }, function (err, user) {
-
-                            if (err) return next(err);
-
-                            res.json({ success: true });
-                        });
-
-                    }
-                });
-            }
-        }
-    });
-
-
-});
 
 
 //sending a post request to authenticate by username and password
@@ -572,6 +577,17 @@ router.get('/candidate', function (req, res, next) {
     })
 });
 
+router.get('/admin', function (req, res, next) {
+    ElectionCommissioner.find(function (err, admins) {
+        if (err) {
+            res.send(err);
+        }
+        
+        res.json(admins);
+
+    })
+});
+
 router.get('/party', function (req, res, next) {
     Party.find(function (err, parties) {
         if (err) {
@@ -616,17 +632,32 @@ router.delete('/voter/:id', function (req, res, next) {
 router.post('/vote', function (req, res, next) {
     const id = req.body.id;
     const party = req.body.party;
-    Candidate.update({ candidate_no: id }, { $inc: { votes: 1 } }, function (err, candidate) {
-        // As always, handle any potential errors:
-        if (err) return next(err);
-
-        Party.update({ name: party }, { $inc: { votes: 1 } }, function (err, party) {
+    const e_id = "e01";
+    if (id == null) {
+        Election.update({ e_id: e_id }, { $inc: { rejected: 1 } }, function (err, election) {
             // As always, handle any potential errors:
             if (err) return next(err);
-    
+
             res.json({ success: true });
         });
-    });
+    } else {
+        Candidate.update({ candidate_no: id }, { $inc: { votes: 1 } }, function (err, candidate) {
+            // As always, handle any potential errors:
+            if (err) return next(err);
+
+            Party.update({ name: party }, { $inc: { votes: 1 } }, function (err, party) {
+                // As always, handle any potential errors:
+                if (err) return next(err);
+
+                Election.update({ e_id: e_id }, { $inc: { total_votes: 1 } }, function (err, election) {
+                    // As always, handle any potential errors:
+                    if (err) return next(err);
+    
+                    res.json({ success: true });
+                });
+            });
+        });
+    }
 })
 
 router.post('/mark_booth_deactivate', function (req, res, next) {
@@ -651,7 +682,7 @@ router.post('/start_election', function (req, res, next) {
 
 router.post('/stop_election', function (req, res, next) {
     const id = "e01";
-    Election.update({ e_id: id }, { $set: { started: false, stopped:true, } }, function (err, user) {
+    Election.update({ e_id: id }, { $set: { started: false, stopped: true, } }, function (err, user) {
         // As always, handle any potential errors:
         if (err) return next(err);
 
@@ -661,7 +692,7 @@ router.post('/stop_election', function (req, res, next) {
 
 router.post('/new_election', function (req, res, next) {
     const id = "e01";
-    Election.update({ e_id: id }, { $set: { started: false, stopped:false, new_election: true, can_release: false } }, function (err, user) {
+    Election.update({ e_id: id }, { $set: { started: false, stopped: false, new_election: true, can_release: false } }, function (err, user) {
         // As always, handle any potential errors:
         if (err) return next(err);
 
@@ -671,7 +702,7 @@ router.post('/new_election', function (req, res, next) {
 
 router.post('/release_results', function (req, res, next) {
     const id = "e01";
-    Election.update({ e_id: id }, { $set: { started: false, stopped:false, new_election: false, can_release: true } }, function (err, user) {
+    Election.update({ e_id: id }, { $set: { started: false, stopped: false, new_election: false, can_release: true } }, function (err, user) {
         // As always, handle any potential errors:
         if (err) return next(err);
 
@@ -700,22 +731,39 @@ router.post('/mark_voter', function (req, res, next) {
     });
 })
 
+router.post('/edit_el', function (req, res, next) {
+    const id = "e01";
+    const name = req.body.name;
+    Election.update({ e_id: id }, { $set: { name: name } }, function (err, election) {
+        // As always, handle any potential errors:
+        if (err) return next(err);
+
+        res.json({ success: true });
+    });
+})
+
 router.post('/reset', function (req, res, next) {
+    const id = "e01";
     Voter.updateMany({}, { $set: { isVoted: false } }, function (err, voter) {
         // As always, handle any potential errors:
         if (err) return next(err);
         Candidate.updateMany({}, { $set: { votes: 0 } }, function (err, candidate) {
             // As always, handle any potential errors:
             if (err) return next(err);
-    
+
             Party.updateMany({}, { $set: { votes: 0 } }, function (err, party) {
                 // As always, handle any potential errors:
                 if (err) return next(err);
-        
-                res.json({ success: true });
+
+                Election.update({e_id: id}, { $set: { total_votes: 0 , rejected: 0} }, function (err, election) {
+                    // As always, handle any potential errors:
+                    if (err) return next(err);
+    
+                    res.json({ success: true });
+                });
             });
         });
-        
+
     });
 })
 
@@ -732,11 +780,11 @@ router.post('/mark_poll', function (req, res, next) {
 
 router.post('/change_pwd', function (req, res, next) {
     let newUser = new ElectionCommissioner({
-        
+
         id: req.body.id,
         username: req.body.username,
         password: req.body.new_password,
-        
+
     });
     bcrypt.genSalt(10, (err, salt) => {
         bcrypt.hash(newUser.password, salt, (err, hash) => {
@@ -746,16 +794,16 @@ router.post('/change_pwd', function (req, res, next) {
                 // As always, handle any potential errors:
                 if (err) {
                     console.log(err);
-                    
+
                     res.json({ success: false, msg: 'failed to Change the Password' });
                 } else {
-                    
+
                     res.json({ success: true, msg: ' Password Changed' });
                 }
             });
         });
     });
-    
+
 })
 
 router.delete('/candidate/:id', function (req, res, next) {
@@ -764,6 +812,15 @@ router.delete('/candidate/:id', function (req, res, next) {
         if (err) return next(err);
 
         res.json(candidate);
+    });
+});
+
+router.delete('/admin/:id', function (req, res, next) {
+    ElectionCommissioner.findByIdAndRemove(req.params.id, req.body, function (err, admin) {
+        // As always, handle any potential errors:
+        if (err) return next(err);
+
+        res.json(admin);
     });
 });
 

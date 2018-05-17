@@ -30,7 +30,7 @@ const ElectionCom = module.exports = mongoose.model('ElectionCom', ElectionCommi
 
 
 //get user by ID
-module.exports.getUserById = function (id, callback) {
+module.exports.getUserById = function (id, callback) {   
     ElectionCom.findById(id, callback);
 }
 

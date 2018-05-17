@@ -52,7 +52,19 @@ app.use('/users', users);
 app.get('/', (req, res) => {
     res.send('Invalid Endpoint');
 });
+app.get("/poll_login", (req, res) => {
+    res.sendFile(path.join(__dirname, "public/index.html"));
+})
+app.get("/poll_login/*", (req, res) => {
+    res.sendFile(path.join(__dirname, "public/index.html"));
+})
 
+app.get("/results", (req, res) => {
+    res.sendFile(path.join(__dirname, "public/index.html"));
+})
+app.get("/login", (req, res) => {
+    res.sendFile(path.join(__dirname, "public/index.html"));
+})
 app.get("/dashboard", (req, res) => {
     res.sendFile(path.join(__dirname, "public/index.html"));
 })

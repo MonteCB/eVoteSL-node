@@ -26,12 +26,16 @@ module.exports = function (passport) {
             });
         } 
         else if(jwt_payload.data.usertype=="admin"){
-            User.getUserById(jwt_payload.data._id, (err, user) => {     //payload by the id
+            User.getUserById(jwt_payload.data._id, (err, user) => {  
+                   //payload by the id
+                   
                 if (err) {
+
                     return done(err, false);
                 }
                 if (user) {
                     return done(null, user);
+                    console.log(jwt_payload);
                 } else {
                     return done(null, false);
 
